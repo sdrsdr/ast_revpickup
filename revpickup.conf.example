@@ -1,0 +1,4 @@
+[general]
+posthupwaitms=500 ; number of MS to wait for the caller to be hanged up before callback def 500
+calltimeout=15000 ; number of MS to wait for the reverse call to be picked up def 15000
+
