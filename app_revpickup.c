@@ -62,7 +62,7 @@ typedef struct  {
 static int revpickup_do(const void *data) {
 	revPickup_data* dt=(revPickup_data*)data;
 	
-	ast_log(LOG_NOTICE, APP ": Enter phase 1.5; Our channel was: %s with pickup group %lld",dt->channel,dt->grp);
+	ast_log(LOG_NOTICE, APP ": Enter phase 1.5; Our channel was: %s with pickup group %lld\n",dt->channel,dt->grp);
 
 	
 	char *tech=dt->channel, *addr=0, *lastdash=0, *cc=dt->channel;
@@ -79,14 +79,14 @@ static int revpickup_do(const void *data) {
 		cc++;
 	}
 	if (addr==0 || *addr==0) {
-		ast_log(LOG_ERROR, APP ": Failed to parse chanel name (not in TECH/ADDR-ID format?)");
+		ast_log(LOG_ERROR, APP ": Failed to parse chanel name (not in TECH/ADDR-ID format?)\n");
 		ast_free(dt->channel);
 		ast_free(dt);
 		return 0;
 	}
 	
 	if (lastdash) *lastdash=0;
-	ast_log(LOG_NOTICE, APP ": Call tech: %s  addr: %s",tech,addr);
+	ast_log(LOG_NOTICE, APP ": Call tech: %s  addr: %s\n",tech,addr);
 	
 	//find a call to pickup
 	
@@ -102,7 +102,7 @@ static int revpickup_do(const void *data) {
 			if (cl->id.name.str) callerName=strdupa(cl->id.name.str);
 			if (cl->id.number.str) callerNum=strdupa(cl->id.number.str);
 			
-			ast_log(LOG_NOTICE, APP ": Go for channel %s , pickup group %llu presenting num:%s nam:%s",cname,ast_channel_pickupgroup(c),callerNum,callerName);
+			ast_log(LOG_NOTICE, APP ": Go for channel %s , pickup group %llu presenting num:%s nam:%s\n",cname,ast_channel_pickupgroup(c),callerNum,callerName);
 			ast_channel_unref(c);
 			break;
 		}
@@ -111,7 +111,7 @@ static int revpickup_do(const void *data) {
 	ast_channel_iterator_destroy (iter);
 
 	if (!cname) {
-		ast_log(LOG_NOTICE, APP ": Cant find ringing channel for group %llu",dt->grp);
+		ast_log(LOG_NOTICE, APP ": Cant find ringing channel for group %llu\n",dt->grp);
 		ast_free(dt->channel);
 		ast_free(dt);
 		return 0;
@@ -144,7 +144,7 @@ static int revpickup_do(const void *data) {
 	
 	ast_free(dt->channel);
 	ast_free(dt);
-	ast_log(LOG_NOTICE, APP ": Phase 1.5 done");
+	ast_log(LOG_NOTICE, APP ": Phase 1.5 done\n");
 	return 0;
 }
 
@@ -153,12 +153,12 @@ static int revpickup_exec(struct ast_channel *chan, const char *appdata)
 
 	long long pgrp=ast_channel_pickupgroup(chan);
 	if (pgrp==0) {
-		ast_log(LOG_NOTICE, APP ": %s has no pickup group set so we'll just hangup",ast_channel_name (chan));
+		ast_log(LOG_NOTICE, APP ": %s has no pickup group set so we'll just hangup\n",ast_channel_name (chan));
 		ast_softhangup 	( chan,	AST_SOFTHANGUP_DEV);
 		return 1;
 	}
 	if (appdata && *appdata!=0) {
-		ast_log(LOG_NOTICE, APP ": Enter phase 2;  Going for %s",appdata);
+		ast_log(LOG_NOTICE, APP ": Enter phase 2;  Going for %s\n",appdata);
 		int found=0;
 		struct ast_channel* target;
 		struct ast_channel_iterator *iter=ast_channel_iterator_all_new();
@@ -173,19 +173,19 @@ static int revpickup_exec(struct ast_channel *chan, const char *appdata)
 		ast_channel_iterator_destroy (iter);
 		
 		if (found){
-			ast_log(LOG_NOTICE, APP ": %s found ringing",appdata);
+			ast_log(LOG_NOTICE, APP ": %s found ringing\n",appdata);
 			int res = ast_do_pickup(chan, target);
 			ast_channel_unlock(target);
 			ast_channel_unref(target);
-			ast_log(LOG_NOTICE, APP ": Phase 2 done");
+			ast_log(LOG_NOTICE, APP ": Phase 2 done\n");
 			return res;
 		} else {
-			ast_log(LOG_NOTICE, APP ": %s not found or not ringing! Phase 2 done",appdata);
+			ast_log(LOG_NOTICE, APP ": %s not found or not ringing! Phase 2 done\n",appdata);
 			return 1;
 		}
 	}
 	
-	ast_log(LOG_NOTICE, APP ": Enter phase 1");
+	ast_log(LOG_NOTICE, APP ": Enter phase 1\n");
 	
 	
 // 	ast_channel_lock (chan);
@@ -217,16 +217,16 @@ static int revpickup_exec(struct ast_channel *chan, const char *appdata)
 	
 	if (!module_sched_started) {
 		module_sched_started=1;
-		ast_log(LOG_NOTICE, APP ": Starting " AST_MODULE " schedule thread");
+		ast_log(LOG_NOTICE, APP ": Starting " AST_MODULE " schedule thread\n");
 		ast_sched_start_thread (module_sched);
 	}
 	if (ast_sched_add (module_sched,posthupwaitms, revpickup_do, dt)==-1) {
-		ast_log(LOG_ERROR, APP ": FAILED to create schedule event for callback! (%s)",dt->channel);
+		ast_log(LOG_ERROR, APP ": FAILED to create schedule event for callback! (%s)\n",dt->channel);
 		ast_free(dt->channel);
 		ast_free(dt);
 	};
 	ast_softhangup 	( chan,	AST_SOFTHANGUP_DEV);
-	ast_log(LOG_NOTICE, APP ": Phase 1 done");
+	ast_log(LOG_NOTICE, APP ": Phase 1 done\n");
 	return 1;
 }
 
@@ -242,7 +242,7 @@ static int load_module(void)
 {
 	
 	if ( sizeof(ast_group_t)!=sizeof(unsigned long long)){
-		ast_log(LOG_ERROR,"This module is build agains unsupported asterisk headers :(");
+		ast_log(LOG_ERROR,"This module is build agains unsupported asterisk headers :(\n");
 		return  AST_MODULE_LOAD_DECLINE;
 	}
 	posthupwaitms=posthupwaitms_DEF;
@@ -270,7 +270,7 @@ static int load_module(void)
 	
 	module_sched_started=0;
 	module_sched=ast_sched_context_create();
-	ast_log(LOG_NOTICE,"revPickup Application is now (re)loaded posthupwaitms:%d calltimeout:%d",posthupwaitms,calltimeout);
+	ast_log(LOG_NOTICE,"revPickup Application is now (re)loaded posthupwaitms:%d calltimeout:%d\n",posthupwaitms,calltimeout);
 	return ast_register_application(app, revpickup_exec,syn,desc);
 }
 

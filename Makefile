@@ -9,7 +9,7 @@ s: app_revpickup.so
 clean:
 	rm *.o *.so
 %.o: %.c
-	gcc -c -g -o $@ $< 
+	gcc -c -o $@ $< 
 	
 %.so: %.o
 	gcc -shared -Xlinker -x -o $@ $< 
